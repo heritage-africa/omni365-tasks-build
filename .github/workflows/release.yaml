@@ -21,7 +21,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       # ---------------------------------------------------------
       # 🔢 Read Node/NPM versions
@@ -60,7 +60,7 @@ jobs:
       - name: Package app
         run: krankerl package
 
-      # ---------------------------------------------------------
+     # ---------------------------------------------------------
       # 🚀 Create GitHub Release & upload tar.gz
       # ---------------------------------------------------------
       - name: Create GitHub Release
