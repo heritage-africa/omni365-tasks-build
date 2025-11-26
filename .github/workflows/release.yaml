@@ -2,16 +2,15 @@ name: Release
 
 on:
   push:
-    branches: [main]
+    tags: ['*']
 
-# Ajoutez ces permissions spécifiques
 permissions:
   contents: write
 
 jobs:
   release:
-    # Only trigger when commit message contains --release
-    if: contains(github.event.head_commit.message, '--release')
+    # Trigger only if the tag name starts with "v"
+    if: startsWith(github.ref_name, 'v')
     runs-on: ubuntu-latest
 
     steps:
@@ -61,13 +60,13 @@ jobs:
         run: krankerl package
 
       # ---------------------------------------------------------
-      # Create GitHub Release & upload tar.gz
+      # 🚀 Create GitHub Release & upload tar.gz
       # ---------------------------------------------------------
       - name: Create GitHub Release
         env: 
           GH_TOKEN: ${{ secrets.DEVOPS }}
         run: |
-          gh release create latest \
-            --title "Release" \
+          gh release create "$GITHUB_REF_NAME" \
+            --title "Release $GITHUB_REF_NAME" \
             --notes "Automated release" \
             ./build/artifacts/tasks.tar.gz
