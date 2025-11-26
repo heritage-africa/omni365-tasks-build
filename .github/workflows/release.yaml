@@ -61,7 +61,7 @@ jobs:
         run: krankerl package
 
       # ---------------------------------------------------------
-      # 🚀 Create GitHub Release & upload tar.gz
+      # Create GitHub Release & upload tar.gz
       # ---------------------------------------------------------
       - name: Create GitHub Release
         env: 
