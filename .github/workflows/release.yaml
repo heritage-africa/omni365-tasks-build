@@ -60,7 +60,7 @@ jobs:
       - name: Package app
         run: krankerl package
 
-     # ---------------------------------------------------------
+      # ---------------------------------------------------------
       # 🚀 Create GitHub Release & upload tar.gz
       # ---------------------------------------------------------
       - name: Create GitHub Release
