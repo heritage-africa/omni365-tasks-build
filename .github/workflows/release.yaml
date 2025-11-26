@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+# Ajoutez ces permissions spécifiques
+permissions:
+  contents: write
+
+jobs:
+  release:
+    # Only trigger when commit message contains --release
+    if: contains(github.event.head_commit.message, '--release')
+    runs-on: ubuntu-latest
+
+    steps:
+      # ---------------------------------------------------------
+      # Checkout code 
+      # ---------------------------------------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ---------------------------------------------------------
+      # 🔢 Read Node/NPM versions
+      # ---------------------------------------------------------
+      - name: Read node & npm versions
+        id: versions
+        uses: skjnldsv/read-package-engines-version-actions@v3
+        with:
+          fallbackNode: '^20'
+          fallbackNpm: '^10'
+
+      # ---------------------------------------------------------
+      # ⚙️ Setup Nextcloud environment + Krankerl
+      # ---------------------------------------------------------
+      - name: Setup Nextcloud environment
+        uses: ChristophWurst/setup-nextcloud@v0.3.2
+        with:
+          node-version: ${{ steps.versions.outputs.nodeVersion }}
+          npm-version: ${{ steps.versions.outputs.npmVersion }}
+          tools: "krankerl"
+
+      # ---------------------------------------------------------
+      # 📦 Install dependencies & build
+      # ---------------------------------------------------------
+      - name: Install dependencies & build
+        env:
+          CYPRESS_INSTALL_BINARY: 0
+          PUPPETEER_SKIP_DOWNLOAD: true
+        run: |
+          npm ci
+          npm run build --if-present
+
+      # ---------------------------------------------------------
+      # 🗜️ Package app with Krankerl
+      # ---------------------------------------------------------
+      - name: Package app
+        run: krankerl package
+
+      # ---------------------------------------------------------
+      # 🚀 Create GitHub Release & upload tar.gz
+      # ---------------------------------------------------------
+      - name: Create GitHub Release
+        env: 
+          GH_TOKEN: ${{ secrets.DEVOPS }}
+        run: |
+          gh release create latest \
+            --title "Release" \
+            --notes "Automated release" \
+            ./build/artifacts/tasks.tar.gz
